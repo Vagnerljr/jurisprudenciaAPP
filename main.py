@@ -10,7 +10,7 @@ def getAssunto():
 
 
 def fetch_data(assunto):
-    url = "https://api-publica.datajud.cnj.jus.br/api_publica_trf1/_search"
+    url = "https://api-publica.datajud.cnj.jus.br/api_publica_stj/_search"
     API_KEY = 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw=='
     payload = json.dumps({
                 "query": {
@@ -23,6 +23,7 @@ def fetch_data(assunto):
                 'Content-Type': 'application/json'
 }
     response = requests.request("POST", url, headers=headers, data=payload)
+    response.encoding = "utf-8"
     return response.json()
 
 
@@ -31,26 +32,43 @@ def create_dataFrame(data):
     dataFrame = []
     for item in data["hits"]["hits"]:
         processos = item["_source"]
-        assuntos = processos['assuntos'][0]
+        assuntos = processos['assuntos'][0]['nome']
         numeroProcesso = processos['numeroProcesso']
         grau = processos['grau']
         data = processos['dataAjuizamento']
-        orgao = processos['orgaoJulgador']
+        orgao = processos['orgaoJulgador']['nome']
+        tribunal = processos['tribunal']
+        classe = processos['classe']['nome']
         dataFrame.append({
             "Número": numeroProcesso,
             "Grau": grau,
             "Data Ajuizamento": data,
             "Órgão Julgador": orgao,
-            "Assuntos": assuntos
+            "Assuntos": assuntos,
+            "Tribunal":tribunal,
+            "Classe": classe
         })
     return dataFrame
 
 
-def main():
+def main():    
+    st.set_page_config(layout= "wide")
+    st.header('Site de pesquisa de Jurisprudencia')
     assunto = getAssunto()
-    data = fetch_data(assunto)    
-    dataFrame = pd.DataFrame(create_dataFrame(data))
-    st.dataframe(dataFrame)
+    if not assunto:
+        st.stop()    
+    data = fetch_data(assunto)        
+    dataFrame = pd.DataFrame(create_dataFrame(data)).applymap(
+    lambda x: x.encode("cp1252", errors="ignore").decode("utf-8", errors="ignore")
+    if isinstance(x, str) else x)    
+    filter = st.selectbox('Orgao Julgador',dataFrame[ "Órgão Julgador"].unique())
+    if filter:
+        dffiltered = dataFrame[dataFrame["Órgão Julgador"] == filter]
+        dffiltered = st.dataframe(dffiltered, hide_index=True)
+    else:
+        df = st.dataframe(dataFrame, hide_index=True)
+
+ 
 
 
 if __name__ == "__main__":

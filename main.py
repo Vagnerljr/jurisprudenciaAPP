@@ -2,7 +2,7 @@ import requests
 import json
 import pandas as pd
 import streamlit as st
-import datetime
+
 
 
 def getAssunto():

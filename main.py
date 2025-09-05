@@ -2,10 +2,7 @@ import requests
 import json
 import pandas as pd
 import streamlit as st
-import dotenv
-import os
 
-dotenv.load_dotenv()
 
 def getAssunto():
     assunto = st.text_input('Digite o assunto do processo:')
@@ -13,7 +10,7 @@ def getAssunto():
 
 
 def fetch_data(assunto):
-    API_KEY = os.environ["DATA_JUD_KEY"] or st.secrets.get("DATAJUD_API_KEY")   
+    API_KEY = st.secrets.get("DATAJUD_API_KEY")   
     url = "https://api-publica.datajud.cnj.jus.br/api_publica_stj/_search"        
     payload = json.dumps({
                 "query": {

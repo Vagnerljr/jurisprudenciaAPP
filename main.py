@@ -2,6 +2,7 @@ import requests
 import json
 import pandas as pd
 import streamlit as st
+import datetime
 
 
 def getAssunto():
@@ -35,14 +36,15 @@ def create_dataFrame(data):
         assuntos = processos['assuntos'][0]['nome']
         numeroProcesso = processos['numeroProcesso']
         grau = processos['grau']
-        data = processos['dataAjuizamento']
+        data_raw = processos['dataAjuizamento']  # ex.: '2024-03-27T00:00:00Z'
+        data_fmt = pd.to_datetime(data_raw, errors="coerce", utc=True).strftime("%d/%m/%Y")
         orgao = processos['orgaoJulgador']['nome']
         tribunal = processos['tribunal']
         classe = processos['classe']['nome']
         dataFrame.append({
             "Número": numeroProcesso,
             "Grau": grau,
-            "Data Ajuizamento": data,
+            "Data Ajuizamento": data_fmt,
             "Órgão Julgador": orgao,
             "Assuntos": assuntos,
             "Tribunal":tribunal,

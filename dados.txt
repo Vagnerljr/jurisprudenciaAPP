@@ -1,4 +1,0 @@
-'orgao julgador'
-'data do julgamento'
-'nome do relator'
-'numero do processo'

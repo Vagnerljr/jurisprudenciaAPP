@@ -2,8 +2,10 @@ import requests
 import json
 import pandas as pd
 import streamlit as st
+import dotenv
+import os
 
-
+dotenv.load_dotenv()
 
 def getAssunto():
     assunto = st.text_input('Digite o assunto do processo:')
@@ -11,8 +13,8 @@ def getAssunto():
 
 
 def fetch_data(assunto):
-    url = "https://api-publica.datajud.cnj.jus.br/api_publica_stj/_search"
-    API_KEY = 'cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw=='
+    API_KEY = os.environ["DATA_JUD_KEY"]   
+    url = "https://api-publica.datajud.cnj.jus.br/api_publica_stj/_search"        
     payload = json.dumps({
                 "query": {
                     "match": {"assuntos.nome": assunto}}
@@ -61,7 +63,7 @@ def main():
         st.stop()    
     data = fetch_data(assunto)        
     dataFrame = pd.DataFrame(create_dataFrame(data)).applymap(
-    lambda x: x.encode("cp1252", errors="ignore").decode("utf-8", errors="ignore")
+    lambda x: x.encode("latin1", errors="ignore").decode("utf-8", errors="ignore")
     if isinstance(x, str) else x)    
     filter = st.selectbox('Orgao Julgador',dataFrame[ "Órgão Julgador"].unique())
     if filter:
